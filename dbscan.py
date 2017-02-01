@@ -7,11 +7,16 @@
 import numpy as np
 import math
 
-UNCLASSIFIED = False
-NOISE = None
+from geodistance import geodistance
 
-def _dist(p,q):
-	return math.sqrt(np.power(p-q,2).sum())
+UNCLASSIFIED = False
+NOISE = -1 #Cluster value is None (We can turn it to -1 later, if desired)
+
+#PQ must come in their valid Coordinates array from GeoJSON (X,Y) (Lon,Lat)
+def _dist(p,q): 
+    #geodistance takes the data in Lat1, Lon1, Lat2, Lon2 form:
+	return geodistance.distanceHaversine(p[1],p[0],q[1],q[0])[0]*1000
+	#return math.sqrt(np.power(p-q,2).sum())
 
 def _eps_neighborhood(p,q,eps):
 	return _dist(p,q) < eps
@@ -79,4 +84,6 @@ def test_dbscan():
     m = np.matrix('1 1.2 0.8 3.7 3.9 3.6 10; 1.1 0.8 1 4 3.9 4.1 10')
     eps = 0.5
     min_points = 2
-    assert dbscan(m, eps, min_points) == [1, 1, 1, 2, 2, 2, None]
+    res = dbscan(m, eps, min_points) 
+    assert res == [1, 1, 1, 2, 2, 2, None]
+    return res
